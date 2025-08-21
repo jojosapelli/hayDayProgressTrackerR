@@ -1,0 +1,39 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+
+.chk-cell {
+  text-align: center;       /* Centra horizontalmente */
+  vertical-align: middle;   /* Centra verticalmente */
+}
+
+.chk-cell input[type="checkbox"] {
+  transform: scale(1.2);    /* Opcional: agranda un poco los checkboxes */
+  cursor: pointer;          /* Opcional: cambia el cursor al pasar */
+}
+
+.center {
+  text-align: center;
+  vertical-align: middle;
+}
+.center input[type="checkbox"] {
+  transform: scale(1.2); /* opcional: agranda un poco */
+}
+
+.logo-img { height: 40px; margin-right: 10px; vertical-align: middle; cursor: pointer; }
+
+.nav { display: flex; gap: 10px; flex-wrap: wrap; }
+.nav-link { text-decoration: none; color: #2c3a2f; padding: 6px 8px; border-radius: 8px; }
+.nav-active { background: #e9eee8; font-weight: 600; }
+
+
+
