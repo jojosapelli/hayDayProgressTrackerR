@@ -13,7 +13,7 @@ const sections = [
   { key: "fishing-area", label: "Fishing Area",         route: "/fishing-area", img: "fishing-area.png" },
   { key: "town",         label: "Town",                 route: "/town",         img: "town.png" },
   { key: "achievements", label: "Achievements",         route: "/achievements", img: "achievements.png" },
-  { key: "trees-bushes", label: "Trees & Bushes",       route: "/trees-bushes", img: "trees-bushes.png" },
+  { key: "trees-bushes", label: "Trees And Bushes",     route: "/trees-bushes", img: "trees-bushes.png" },
 ];
 
 // % para secciones con { rows: [{ levels:[0/1,...] }, ...] }
@@ -41,6 +41,14 @@ function calcCounterPct(sectionObj) {
   return +((curr / total) * 100).toFixed(2);
 }
 
+// % para secciones con { rows: [{ unlocked: 0|1 }, ...] }  ➜ Trees & Bushes
+function calcUnlockedPct(sectionObj) {
+  if (!sectionObj?.rows?.length) return 0;
+  const total = sectionObj.rows.length;
+  const done  = sectionObj.rows.reduce((a, r) => a + (r?.unlocked ? 1 : 0), 0);
+  return +((done / total) * 100).toFixed(2);
+}
+
 export default function Home() {
   const base = import.meta.env.BASE_URL;
 
@@ -49,19 +57,18 @@ export default function Home() {
     try { all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     catch { all = {}; }
 
-    // Progreso combinado de Animals (Animals + Specials + Pets)
+    // Progreso combinado de Animals (Animals + Specials + Pets) guardado por Animals.jsx
     const animalsCombined = all?.animalsSummary?.combinedPct ?? 0;
 
     const map = {};
     sections.forEach(s => {
       if (s.key === "animals") {
-        // usa el combinado guardado por Animals.jsx
         map[s.key] = animalsCombined;
       } else if (s.key === "animal-homes") {
-        // contador (current/total) guardado por AnimalHomes.jsx
         map[s.key] = calcCounterPct(all["animal-homes"]);
+      } else if (s.key === "trees-bushes") {
+        map[s.key] = calcUnlockedPct(all["trees-bushes"]);
       } else {
-        // secciones normales con rows/levels
         map[s.key] = calcSectionPct(all[s.key]);
       }
     });
@@ -85,11 +92,10 @@ export default function Home() {
     <main className="container">
       <h2 style={{ marginBottom: "1rem" }}>Welcome</h2>
 
-      {/* === CONTENEDORES (botón + imagen + mini barra) === */}
+      {/* Contenedores (botón + imagen + mini barra) */}
       <div className="home-grid">
         {sections.map((t) => {
           const pct = +(progressMap?.[t.key] ?? 0); // 0..100
-
           return (
             <div key={t.route} className="home-card-wrap">
               <Link to={t.route} className="home-card">
@@ -104,7 +110,6 @@ export default function Home() {
                 onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
               />
 
-              {/* mini barra dentro del contenedor */}
               <div className="home-mini-row">
                 <div className="mini-progress">
                   <div className="mini-done" style={{ width: `${pct.toFixed(2)}%` }} />
@@ -117,7 +122,7 @@ export default function Home() {
         })}
       </div>
 
-      {/* === RESUMEN DE PROGRESO (debajo) — opcional === */}
+      {/* Resumen de progreso (debajo) */}
       <section className="card" style={{ marginTop: 24 }}>
         <h3 style={{ marginTop: 0 }}>Progress summary</h3>
         <div className="summary-rows">
