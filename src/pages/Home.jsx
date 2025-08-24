@@ -16,7 +16,7 @@ const sections = [
   { key: "trees-bushes", label: "Trees & Bushes",       route: "/trees-bushes", img: "trees-bushes.png" },
 ];
 
-// calcula % desde { rows: [{levels:[0/1,...]}, ...] }
+// % para secciones con { rows: [{ levels:[0/1,...] }, ...] }
 function calcSectionPct(sectionObj) {
   if (!sectionObj?.rows?.length) return 0;
   const perRow = sectionObj.rows
@@ -32,6 +32,15 @@ function calcSectionPct(sectionObj) {
   return +(avg * 100).toFixed(2);
 }
 
+// % para secciones tipo contador { items: [{ current, total }, ...] }
+function calcCounterPct(sectionObj) {
+  if (!sectionObj?.items?.length) return 0;
+  const total = sectionObj.items.reduce((a, r) => a + (+r.total || 0), 0);
+  const curr  = sectionObj.items.reduce((a, r) => a + (+r.current || 0), 0);
+  if (!total) return 0;
+  return +((curr / total) * 100).toFixed(2);
+}
+
 export default function Home() {
   const base = import.meta.env.BASE_URL;
 
@@ -39,15 +48,24 @@ export default function Home() {
     let all = {};
     try { all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     catch { all = {}; }
+
+    // Progreso combinado de Animals (Animals + Specials + Pets)
     const animalsCombined = all?.animalsSummary?.combinedPct ?? 0;
+
     const map = {};
-    sections.forEach(s => { if (s.key === "animals") {
-      // 👇 uso el valor combinado
-      map[s.key] = animalsCombined;
-        } else {
+    sections.forEach(s => {
+      if (s.key === "animals") {
+        // usa el combinado guardado por Animals.jsx
+        map[s.key] = animalsCombined;
+      } else if (s.key === "animal-homes") {
+        // contador (current/total) guardado por AnimalHomes.jsx
+        map[s.key] = calcCounterPct(all["animal-homes"]);
+      } else {
+        // secciones normales con rows/levels
         map[s.key] = calcSectionPct(all[s.key]);
-        } });
-        return map;
+      }
+    });
+    return map;
   }, []);
 
   const [progressMap, setProgressMap] = useState(loadProgress);
@@ -79,7 +97,7 @@ export default function Home() {
               </Link>
 
               <img
-                src={`${base}assets/home/${t.img}`}   // ← sin carpeta /home/
+                src={`${base}assets/home/${t.img}`}
                 alt={t.label}
                 className="home-card-img"
                 loading="lazy"
@@ -99,7 +117,7 @@ export default function Home() {
         })}
       </div>
 
-      {/* === RESUMEN DE PROGRESO (debajo) — opcional, lo dejo como lo tenías === */}
+      {/* === RESUMEN DE PROGRESO (debajo) — opcional === */}
       <section className="card" style={{ marginTop: 24 }}>
         <h3 style={{ marginTop: 0 }}>Progress summary</h3>
         <div className="summary-rows">

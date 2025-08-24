@@ -11,8 +11,8 @@ import Crops from "./pages/Crops";
 import Expansion from "./pages/Expansion";
 import FishingArea from "./pages/FishingArea";
 import Town from "./pages/Town";
-import Achievements from "./pages/Achivements";        // ojo a la ortografía del archivo
-import TreesAndBushes from "./pages/Trees&Bushes";     // el nombre del archivo tiene &
+import Achievements from "./pages/Achievements";        // ojo a la ortografía del archivo
+import TreesAndBushes from "./pages/TreesAndBushes";     // el nombre del archivo tiene &
 
 function App() {
   return (

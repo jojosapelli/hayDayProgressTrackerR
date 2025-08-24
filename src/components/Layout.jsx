@@ -31,7 +31,7 @@ export default function Layout() {
           <NavLink to="/fishing-area" className={linkClass}>Fishing</NavLink>
           <NavLink to="/town" className={linkClass}>Town</NavLink>
           <NavLink to="/achievements" className={linkClass}>Achievements</NavLink>
-          <NavLink to="/trees-bushes" className={linkClass}>Trees & Bushes</NavLink>
+          <NavLink to="/trees-bushes" className={linkClass}>Trees and Bushes</NavLink>
         </nav>
       </header>
 
