@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 
@@ -16,19 +17,19 @@ const sections = [
   { key: "trees-bushes", label: "Trees And Bushes",     route: "/trees-bushes", img: "trees-bushes.png" },
 ];
 
-// % para secciones con { rows: [{ levels:[0/1,...] }, ...] }
+// % para secciones { rows: [{ levels:[0/1,...] }, ...] }
 function calcSectionPct(sectionObj) {
   if (!sectionObj?.rows?.length) return 0;
   const perRow = sectionObj.rows
     .map(r => {
-      const t = Array.isArray(r.levels) ? r.levels.length : 0;
-      if (!t) return null;
-      const done = r.levels.reduce((a,b) => a + (b ? 1 : 0), 0);
-      return done / t;
+      const lv = Array.isArray(r.levels) ? r.levels : [];
+      if (!lv.length) return null;
+      const done = lv.reduce((a, b) => a + (b ? 1 : 0), 0);
+      return done / lv.length;
     })
     .filter(v => v !== null);
   if (!perRow.length) return 0;
-  const avg = perRow.reduce((a,b) => a + b, 0) / perRow.length;
+  const avg = perRow.reduce((a, b) => a + b, 0) / perRow.length;
   return +(avg * 100).toFixed(2);
 }
 
@@ -41,12 +42,23 @@ function calcCounterPct(sectionObj) {
   return +((curr / total) * 100).toFixed(2);
 }
 
-// % para secciones con { rows: [{ unlocked: 0|1 }, ...] }  ➜ Trees & Bushes
-function calcUnlockedPct(sectionObj) {
-  if (!sectionObj?.rows?.length) return 0;
-  const total = sectionObj.rows.length;
-  const done  = sectionObj.rows.reduce((a, r) => a + (r?.unlocked ? 1 : 0), 0);
-  return +((done / total) * 100).toFixed(2);
+// % especial para Fishing Area (suma prodRows + fishRows)
+function calcFishingAreaPct(sectionObj) {
+  if (!sectionObj) return 0;
+  const sumRows = (rows) => {
+    if (!Array.isArray(rows) || !rows.length) return { done: 0, total: 0 };
+    return rows.reduce((acc, r) => {
+      const lv = Array.isArray(r?.levels) ? r.levels : [];
+      const done = lv.reduce((a, b) => a + (b ? 1 : 0), 0);
+      return { done: acc.done + done, total: acc.total + lv.length };
+    }, { done: 0, total: 0 });
+  };
+
+  const tProd = sumRows(sectionObj.prodRows);
+  const tFish = sumRows(sectionObj.fishRows);
+  const done = tProd.done + tFish.done;
+  const total = tProd.total + tFish.total;
+  return total ? +((done / total) * 100).toFixed(2) : 0;
 }
 
 export default function Home() {
@@ -57,7 +69,8 @@ export default function Home() {
     try { all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     catch { all = {}; }
 
-    // Progreso combinado de Animals (Animals + Specials + Pets) guardado por Animals.jsx
+    // Progreso combinado de Animals (Animals + Specials + Pets),
+    // lo guarda Animals.jsx como animalsSummary.combinedPct
     const animalsCombined = all?.animalsSummary?.combinedPct ?? 0;
 
     const map = {};
@@ -66,8 +79,10 @@ export default function Home() {
         map[s.key] = animalsCombined;
       } else if (s.key === "animal-homes") {
         map[s.key] = calcCounterPct(all["animal-homes"]);
-      } else if (s.key === "trees-bushes") {
-        map[s.key] = calcUnlockedPct(all["trees-bushes"]);
+      } else if (s.key === "fishing-area") {
+        map[s.key] = calcFishingAreaPct(all["fishing-area"]);
+      } else if (s.key === "expansion") {
+        map[s.key] = calcCounterPct(all["expansion"]);
       } else {
         map[s.key] = calcSectionPct(all[s.key]);
       }
@@ -92,16 +107,15 @@ export default function Home() {
     <main className="container">
       <h2 style={{ marginBottom: "1rem" }}>Welcome</h2>
 
-      {/* Contenedores (botón + imagen + mini barra) */}
+      {/* Grid de tarjetas con mini barra */}
       <div className="home-grid">
         {sections.map((t) => {
-          const pct = +(progressMap?.[t.key] ?? 0); // 0..100
+          const pct = +(progressMap?.[t.key] ?? 0);
           return (
             <div key={t.route} className="home-card-wrap">
               <Link to={t.route} className="home-card">
                 {t.label}
               </Link>
-
               <img
                 src={`${base}assets/home/${t.img}`}
                 alt={t.label}
@@ -109,7 +123,6 @@ export default function Home() {
                 loading="lazy"
                 onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
               />
-
               <div className="home-mini-row">
                 <div className="mini-progress">
                   <div className="mini-done" style={{ width: `${pct.toFixed(2)}%` }} />
@@ -122,7 +135,7 @@ export default function Home() {
         })}
       </div>
 
-      {/* Resumen de progreso (debajo) */}
+      {/* Resumen debajo (opcional) */}
       <section className="card" style={{ marginTop: 24 }}>
         <h3 style={{ marginTop: 0 }}>Progress summary</h3>
         <div className="summary-rows">

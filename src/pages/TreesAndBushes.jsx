@@ -1,4 +1,4 @@
-// src/pages/Trees&Bushes.jsx
+// src/pages/TreesAndBushes.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import StarToggle from "../components/StarToggle";
 
@@ -29,53 +29,51 @@ const masterRows = [
 export default function TreesAndBushes() {
   const base = import.meta.env.BASE_URL;
 
-  // Estado inicial (storage o master)
+  // Estado inicial (storage o master) — ahora usamos levels:[0/1]
   const initial = useMemo(() => {
     try {
       const all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
       const saved = all["trees-bushes"];
-      if (saved?.rows?.length === masterRows.length) {
-        return saved;
+      // Aceptamos tanto el formato nuevo (levels) como el viejo (unlocked) y normalizamos
+      if (saved?.rows?.length) {
+        const rows = saved.rows.map((r) => {
+          if (Array.isArray(r?.levels)) return { name: r.name, levels: [r.levels[0] ? 1 : 0] };
+          return { name: r.name, levels: [r.unlocked ? 1 : 0] }; // compatibilidad
+        });
+        return { rows, updatedAt: new Date().toISOString() };
       }
     } catch {}
     return {
-      rows: masterRows.map(name => ({ name, unlocked: 0 })),
+      rows: masterRows.map((name) => ({ name, levels: [0] })),
       updatedAt: new Date().toISOString(),
     };
   }, []);
 
   const [data, setData] = useState(initial);
 
-  // Guardar en localStorage
+  // Guardar en localStorage con la clave que Home espera: "trees-bushes"
   useEffect(() => {
     const all = (() => {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-      } catch {
-        return {};
-      }
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch { return {}; }
     })();
     all["trees-bushes"] = { ...data, updatedAt: new Date().toISOString() };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   }, [data]);
 
-  // Toggle de unlocked
+  // Toggle (levels[0])
   const toggle = (rowIdx) => {
-    setData(prev => {
-      const copy = { ...prev, rows: [...prev.rows] };
-      copy.rows[rowIdx] = {
-        ...copy.rows[rowIdx],
-        unlocked: copy.rows[rowIdx].unlocked ? 0 : 1,
-      };
-      return copy;
+    setData((prev) => {
+      const next = { ...prev, rows: prev.rows.map((r) => ({ ...r, levels: [...r.levels] })) };
+      next.rows[rowIdx].levels[0] = next.rows[rowIdx].levels[0] ? 0 : 1;
+      return next;
     });
   };
 
-  // % completado
+  // % completado (promedio de levels[0])
   const pct = useMemo(() => {
     if (!data.rows.length) return 0;
-    const vals = data.rows.map(r => r.unlocked);
-    const sum = vals.reduce((a, b) => a + b, 0);
+    const sum = data.rows.reduce((a, r) => a + (r.levels?.[0] ? 1 : 0), 0);
     return (sum / data.rows.length) * 100;
   }, [data.rows]);
 
@@ -106,7 +104,7 @@ export default function TreesAndBushes() {
                   <td className="name-cell">{r.name}</td>
                   <td className="center">
                     <StarToggle
-                      checked={!!r.unlocked}
+                      checked={!!r.levels?.[0]}
                       onChange={() => toggle(i)}
                       label={`${r.name} completed`}
                       imgOn={`${base}assets/unlocked.png`}
