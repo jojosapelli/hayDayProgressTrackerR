@@ -280,3 +280,25 @@ nav a { margin-left: 12px; text-decoration: none; color: #2c3a2f; }
   text-align: center;   /* 👈 corregido */
 }
 
+/* Town Service Buildings */
+/* Sólo Service Buildings */
+.svc-counter{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.svc-counter span{
+  min-width: 56px;          /* asegura mismo ancho:  “6/6”, “12/12”, etc. */
+  text-align: center;
+  display: inline-block;
+}
+
+.svc-counter .btn-small{
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  line-height: 1;
+}
