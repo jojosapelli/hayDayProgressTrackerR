@@ -83,6 +83,9 @@ export default function Home() {
         map[s.key] = calcFishingAreaPct(all["fishing-area"]);
       } else if (s.key === "expansion") {
         map[s.key] = calcCounterPct(all["expansion"]);
+      } else if (s.key === "town") {
+        // 👈 leer el porcentaje total que guarda Town.jsx
+        map[s.key] = +(all?.townSummary?.totalPct ?? 0);
       } else {
         map[s.key] = calcSectionPct(all[s.key]);
       }
