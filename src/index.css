@@ -3,6 +3,9 @@
   --blue:#1967af;
   --yellow:#ffcc00;
   --bg-accent:#f7f8ad;
+  /* opcional */
+  --town-done:#f84360;
+  --town-todo:#c0374f;
 }
 
 /* Reset */
@@ -50,10 +53,24 @@ body{
 
 /* ===== Home layout: ahora 2fr | 1fr ===== */
 .home-layout{ display:grid; grid-template-columns: 2fr 1fr; column-gap:24px; align-items:start; }
-.home-title{ grid-column:1 / -1; justify-self:center; margin:0 0 12px; text-align:center; }
+.home-title{ 
+  grid-column:1 / -1; 
+  justify-self:center; 
+  margin:0 0 12px; 
+  text-align:center;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #fff;
+  -webkit-text-stroke: 5px #000;
+  paint-order: stroke;
+}
 
 /* Grid de páginas (ahora en derecha) */
-.home-left{ align-self:start; }
+.home-left{
+  display: grid;       /* 👈 antes era sólo align-self:start */
+  gap: 15px;           /* 👈 separa verticalmente sus hijos */
+  align-content: start;
+}
 .home-grid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap:16px; }
 .home-card-wrap{ border:2px solid #000; border-radius:14px; padding:12px; background:var(--bg-accent); display:flex; flex-direction:column; gap:12px; }
 .home-card{ display:grid; place-items:center; height:64px; text-align:center; background:var(--yellow); color:#222; font-weight:700; text-decoration:none; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,.08); transition:transform .15s ease, box-shadow .15s ease; }
@@ -91,7 +108,8 @@ body{
 
 /* Mini progress */
 .mini-progress{ display:flex; width:100%; height:10px; border-radius:999px; overflow:hidden; background:transparent; }
-.mini-progress .mini-done{ background:var(--green); transition:width .25s ease; }
+
+
 .mini-progress .mini-todo{ background:var(--blue); transition:width .25s ease; }
 .home-mini-row{ display:grid; grid-template-columns:1fr 64px; align-items:center; gap:10px; }
 .mini-pct{ text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
