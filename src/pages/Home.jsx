@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 
@@ -14,80 +13,109 @@ const sections = [
   { key: "fishing-area", label: "Fishing Area",         route: "/fishing-area", img: "fishing-area.png" },
   { key: "town",         label: "Town",                 route: "/town",         img: "town.png" },
   { key: "achievements", label: "Achievements",         route: "/achievements", img: "achievements.png" },
-  { key: "trees-bushes", label: "Trees And Bushes",     route: "/trees-bushes", img: "trees-bushes.png" },
+  { key: "trees-bushes", label: "Trees & Bushes",       route: "/trees-bushes", img: "trees-bushes.png" },
 ];
 
-// % para secciones { rows: [{ levels:[0/1,...] }, ...] }
+/* ===== Helpers de progreso ===== */
+
+// % promedio por fila a partir de levels:[0/1,...]
 function calcSectionPct(sectionObj) {
-  if (!sectionObj?.rows?.length) return 0;
-  const perRow = sectionObj.rows
+  const rows = sectionObj?.rows;
+  if (!Array.isArray(rows) || !rows.length) return 0;
+  const perRow = rows
     .map(r => {
-      const lv = Array.isArray(r.levels) ? r.levels : [];
-      if (!lv.length) return null;
-      const done = lv.reduce((a, b) => a + (b ? 1 : 0), 0);
-      return done / lv.length;
+      const arr = Array.isArray(r.levels) ? r.levels : [];
+      if (!arr.length) return null;
+      const done = arr.reduce((a, b) => a + (b ? 1 : 0), 0);
+      return done / arr.length;
     })
     .filter(v => v !== null);
   if (!perRow.length) return 0;
-  const avg = perRow.reduce((a, b) => a + b, 0) / perRow.length;
+  const avg = perRow.reduce((a,b)=>a+b,0) / perRow.length;
   return +(avg * 100).toFixed(2);
 }
 
-// % para secciones tipo contador { items: [{ current, total }, ...] }
+// % para contadores tipo {items:[{current,total},...]} o directamente [{current,total},...]
 function calcCounterPct(sectionObj) {
-  if (!sectionObj?.items?.length) return 0;
-  const total = sectionObj.items.reduce((a, r) => a + (+r.total || 0), 0);
-  const curr  = sectionObj.items.reduce((a, r) => a + (+r.current || 0), 0);
+  const items = sectionObj?.items || sectionObj;
+  if (!Array.isArray(items) || !items.length) return 0;
+  const total = items.reduce((a,r)=>a+(+r.total||0),0);
+  const curr  = items.reduce((a,r)=>a+(+r.current||0),0);
   if (!total) return 0;
-  return +((curr / total) * 100).toFixed(2);
+  return +((curr/total)*100).toFixed(2);
 }
 
-// % especial para Fishing Area (suma prodRows + fishRows)
-function calcFishingAreaPct(sectionObj) {
-  if (!sectionObj) return 0;
-  const sumRows = (rows) => {
-    if (!Array.isArray(rows) || !rows.length) return { done: 0, total: 0 };
-    return rows.reduce((acc, r) => {
-      const lv = Array.isArray(r?.levels) ? r.levels : [];
-      const done = lv.reduce((a, b) => a + (b ? 1 : 0), 0);
-      return { done: acc.done + done, total: acc.total + lv.length };
-    }, { done: 0, total: 0 });
-  };
-
-  const tProd = sumRows(sectionObj.prodRows);
-  const tFish = sumRows(sectionObj.fishRows);
-  const done = tProd.done + tFish.done;
-  const total = tProd.total + tFish.total;
-  return total ? +((done / total) * 100).toFixed(2) : 0;
+// === Fishing Area específico (usa { prodRows, fishRows } como guarda tu página)
+function totalsFromRows(rows){
+  if (!Array.isArray(rows) || !rows.length) return {done:0,total:0};
+  return rows.reduce((acc,r)=>{
+    const lv = Array.isArray(r.levels) ? r.levels : [];
+    const done = lv.reduce((a,b)=>a+(b?1:0),0);
+    return { done: acc.done + done, total: acc.total + lv.length };
+  }, {done:0,total:0});
+}
+function calcFishingAreaPctFA(obj){
+  if (!obj) return 0;
+  const t1 = totalsFromRows(obj.prodRows);
+  const t2 = totalsFromRows(obj.fishRows);
+  const done = t1.done + t2.done;
+  const total = t1.total + t2.total;
+  if (!total) return 0;
+  return +((done/total)*100).toFixed(2);
 }
 
+/* ===== Componente ===== */
 export default function Home() {
   const base = import.meta.env.BASE_URL;
 
+  // XP & Rep con persistencia
+  const [xp, setXp] = useState(() => {
+    try { return +(JSON.parse(localStorage.getItem(STORAGE_KEY))?.homeStats?.xp ?? 0) || 0; }
+    catch { return 0; }
+  });
+  const [rep, setRep] = useState(() => {
+    try { return +(JSON.parse(localStorage.getItem(STORAGE_KEY))?.homeStats?.rep ?? 0) || 0; }
+    catch { return 0; }
+  });
+
+  useEffect(() => {
+    const all = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }})();
+    all.homeStats = { xp, rep };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  }, [xp, rep]);
+
+  // Cargar progresos de todas las secciones
   const loadProgress = useMemo(() => () => {
     let all = {};
     try { all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     catch { all = {}; }
 
-    // Progreso combinado de Animals (Animals + Specials + Pets),
-    // lo guarda Animals.jsx como animalsSummary.combinedPct
     const animalsCombined = all?.animalsSummary?.combinedPct ?? 0;
-
     const map = {};
+
     sections.forEach(s => {
-      if (s.key === "animals") {
-        map[s.key] = animalsCombined;
-      } else if (s.key === "animal-homes") {
-        map[s.key] = calcCounterPct(all["animal-homes"]);
-      } else if (s.key === "fishing-area") {
-        map[s.key] = calcFishingAreaPct(all["fishing-area"]);
-      } else if (s.key === "expansion") {
-        map[s.key] = calcCounterPct(all["expansion"]);
-      } else if (s.key === "town") {
-        // 👈 leer el porcentaje total que guarda Town.jsx
-        map[s.key] = +(all?.townSummary?.totalPct ?? 0);
-      } else {
-        map[s.key] = calcSectionPct(all[s.key]);
+      switch (s.key) {
+        case "animals":
+          map[s.key] = animalsCombined;
+          break;
+        case "animal-homes":
+          map[s.key] = calcCounterPct(all["animal-homes"]);
+          break;
+        case "fishing-area":
+          map[s.key] = calcFishingAreaPctFA(all["fishing-area"]); // 👈 ahora lee {prodRows, fishRows}
+          break;
+        case "expansion":
+          map[s.key] = calcCounterPct(all["expansion"]);
+          break;
+        case "town":
+          map[s.key] = +(all?.townSummary?.totalPct ?? 0);
+          break;
+        case "trees-bushes":
+          // La página guarda rows con levels[0]; calculamos como sección de levels
+          map[s.key] = calcSectionPct(all["trees-bushes"]);
+          break;
+        default:
+          map[s.key] = calcSectionPct(all[s.key]);
       }
     });
     return map;
@@ -106,57 +134,106 @@ export default function Home() {
     };
   }, [loadProgress]);
 
+  // Sanitizado para inputs (0..999, sin ceros a la izquierda)
+  const sanitizeInt = (val) => {
+    const only = String(val).replace(/\D+/g, "");
+    const trimmed = only.replace(/^0+(?=\d)/, "");
+    const n = trimmed === "" ? 0 : +trimmed;
+    return Math.max(0, Math.min(999, n));
+  };
+  const onXpChange  = (e) => setXp(sanitizeInt(e.target.value));
+  const onRepChange = (e) => setRep(sanitizeInt(e.target.value));
+  const preventWheel = (e) => e.currentTarget.blur();
+
   return (
     <main className="container">
-      <h2 style={{ marginBottom: "1rem" }}>Welcome</h2>
+      <div className="home-layout">
+        <h2 className="home-title">Welcome</h2>
 
-      {/* Grid de tarjetas con mini barra */}
-      <div className="home-grid">
-        {sections.map((t) => {
-          const pct = +(progressMap?.[t.key] ?? 0);
-          return (
-            <div key={t.route} className="home-card-wrap">
-              <Link to={t.route} className="home-card">
-                {t.label}
-              </Link>
-              <img
-                src={`${base}assets/home/${t.img}`}
-                alt={t.label}
-                className="home-card-img"
-                loading="lazy"
-                onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
-              />
-              <div className="home-mini-row">
-                <div className="mini-progress">
-                  <div className="mini-done" style={{ width: `${pct.toFixed(2)}%` }} />
-                  <div className="mini-todo" style={{ width: `${(100 - pct).toFixed(2)}%` }} />
-                </div>
-                <div className="mini-pct">{pct.toFixed(2)}%</div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        {/* Izquierda: mosaico de secciones */}
+        <div className="home-left">
+          <div className="home-grid">
+            {sections.map((t) => {
+              const pct = +(progressMap?.[t.key] ?? 0);
+              return (
+                <div key={t.route} className="home-card-wrap">
+                  <Link to={t.route} className="home-card">
+                    {t.label}
+                  </Link>
 
-      {/* Resumen debajo (opcional) */}
-      <section className="card" style={{ marginTop: 24 }}>
-        <h3 style={{ marginTop: 0 }}>Progress summary</h3>
-        <div className="summary-rows">
-          {sections.map(s => {
-            const pct = progressMap[s.key] ?? 0;
-            return (
-              <div key={s.key} className="summary-row">
-                <div className="summary-label">{s.label}</div>
-                <div className="mini-progress">
-                  <div className="mini-done" style={{ width: `${pct.toFixed(2)}%` }} />
-                  <div className="mini-todo" style={{ width: `${(100 - pct).toFixed(2)}%` }} />
+                  <img
+                    src={`${base}assets/home/${t.img}`}
+                    alt={t.label}
+                    className="home-card-img"
+                    loading="lazy"
+                    onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                  />
+
+                  <div className="home-mini-row">
+                    <div className="mini-progress">
+                      <div className="mini-done" style={{ width: `${pct.toFixed(2)}%` }} />
+                      <div className="mini-todo" style={{ width: `${(100 - pct).toFixed(2)}%` }} />
+                    </div>
+                    <div className="mini-pct">{pct.toFixed(2)}%</div>
+                  </div>
                 </div>
-                <div className="summary-value">{pct.toFixed(2)}%</div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </section>
+
+        {/* Derecha: XP/Rep + resumen */}
+        <div className="home-right">
+          <div className="stats-row">
+            <div className="card stat-card">
+              <img src={`${base}assets/xp.png`} alt="XP Level" className="stat-img" draggable="false" />
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={xp}
+                onChange={onXpChange}
+                onWheel={preventWheel}
+                className="stat-input"
+                aria-label="XP level"
+              />
+            </div>
+
+            <div className="card stat-card">
+              <img src={`${base}assets/Reputation.png`} alt="Reputation Level" className="stat-img" draggable="false" />
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={rep}
+                onChange={onRepChange}
+                onWheel={preventWheel}
+                className="stat-input"
+                aria-label="Reputation level"
+              />
+            </div>
+          </div>
+
+          <section className="card">
+            <h3 style={{ marginTop: 0 }}>Progress summary</h3>
+            <div className="summary-rows">
+              {sections.map(s => {
+                const pct = progressMap[s.key] ?? 0;
+                return (
+                  <div key={s.key} className="summary-row">
+                    <div className="summary-label">{s.label}</div>
+                    <div className="mini-progress">
+                      <div className="mini-done" style={{ width: `${pct.toFixed(2)}%` }} />
+                      <div className="mini-todo" style={{ width: `${(100 - pct).toFixed(2)}%` }} />
+                    </div>
+                    <div className="summary-value">{pct.toFixed(2)}%</div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      </div>
     </main>
   );
 }
