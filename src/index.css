@@ -27,12 +27,60 @@ body{
 .logo-img2{ height:170px; margin-right:10px; vertical-align:middle; cursor:pointer; }
 
 /* Nav (botones con imagen) */
-.nav { position: relative; z-index: 1; }
-.nav-link{ position:relative; display:inline-block; width:110px; height:44px; padding:0; border-radius:8px; text-decoration:none; color:#222; font-weight:700; }
+.nav {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0px 24px;     /* 8px = espacio vertical, 24px = espacio horizontal */
+  justify-content: flex-start; /* o center si querés todo centrado */
+}
+.nav-link {
+  position: relative;
+  display: inline-block;
+  width: 150px;            /* 🔹 más ancho para texto largo */
+  height: 60px;            /* 🔹 más alto para que no corte */
+  padding: 0;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;      /* 🔹 no permite salto de línea */
+}
 .nav-active .nav-btn-img{ filter:brightness(1.05); }
-.nav-link:hover{ color:inherit; transform:none; }
-.nav-btn-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; display:block; }
-.nav-btn-text{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; width:100%; color:#fff; font-size:16px; font-weight:900; pointer-events:none; text-shadow:-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
+.nav-link:hover {
+  color: inherit;
+  transform: scale(1.1);   /* 🔹 agranda el botón */
+  transition: transform 0.2s ease;  /* 🔹 animación suave */
+}
+
+.nav-btn-img {
+  position: absolute;
+  inset: 0;
+  width: 110%;
+  height: 100%;
+  object-fit: contain;      /* 🔹 asegura que la imagen no se deforme */
+  display: block;
+}
+.nav-btn-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 13px;    /* 🔹 espacio superior */
+  padding-left: 15px; 
+  width: 100%;
+  color: #fff;
+  font-size: 18px;          /* 🔹 más grande */
+  font-weight: 900;
+  pointer-events: none;
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000;
+}
 
 /* Cards */
 .card{ background:var(--bg-accent); padding:16px; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,.06); }

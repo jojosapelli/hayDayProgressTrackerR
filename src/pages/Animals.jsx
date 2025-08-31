@@ -178,8 +178,18 @@ export default function Animals() {
 
   return (
     <main className="container">
-      {/* ====== Animals (3 niveles) ====== */}
+      {/* ====== Overall progress ====== */}
       <section className="card">
+        <h2 style={{ marginTop: 0 }}>Animals — Overall progress</h2>
+        <div className="progress" style={{ marginBottom: 12 }}>
+          <div className="done" style={{ width: `${combinedPct}%` }} />
+          <div className="todo" style={{ width: `${100 - combinedPct}%` }} />
+        </div>
+        <div className="progress-note">{combinedPct.toFixed(2)}% completed</div>
+      </section>
+
+      {/* ====== Animals (3 niveles) ====== */}
+      <section className="card" style={{ marginTop: 20 }}>
         <h2 style={{ marginTop: 0 }}>Animals</h2>
         <div className="progress" style={{ marginBottom: 12 }}>
           <div className="done" style={{ width: `${animalsPct}%` }} />
@@ -257,7 +267,7 @@ export default function Animals() {
         </div>
       </section>
 
-      {/* ====== Pets (contador, nuevo formato) ====== */}
+      {/* ====== Pets (contador) ====== */}
       <section className="card" style={{ marginTop: 20 }}>
         <h2 style={{ marginTop: 0 }}>Pets</h2>
 

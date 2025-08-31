@@ -1,3 +1,4 @@
+// src/pages/AnimalHomes.jsx
 import { useEffect, useMemo, useState } from "react";
 
 const STORAGE_KEY = "hayday-progress-v1";
@@ -53,7 +54,8 @@ export default function AnimalHomes() {
     try { all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     catch { all = {}; }
 
-    let items = all?.animalHomes?.items;
+    // 👇 usamos "animal-homes" (kebab-case) para coincidir con Home.jsx
+    let items = all?.["animal-homes"]?.items;
     if (!Array.isArray(items) || !items.length) {
       items = homesMaster.map(h => ({ name: h.name, current: 0, total: h.total }));
     } else {
@@ -72,7 +74,9 @@ export default function AnimalHomes() {
 
   useEffect(() => {
     const all = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }})();
-    all.animalHomes = { items, updatedAt: new Date().toISOString() };
+
+    // 👇 guardamos también en "animal-homes"
+    all["animal-homes"] = { items, updatedAt: new Date().toISOString() };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   }, [items]);
 
