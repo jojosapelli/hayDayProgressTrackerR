@@ -1,111 +1,40 @@
 :root{
-  --green:#48b8fc;     /* progreso hecho */
-  --blue:#1967af;      /* restante */
-  --yellow:#ffcc00;    /* botones, tags */
-  --bg-accent:#f7f8ad; /* cards/imagenes suaves */
+  --green:#48b8fc;
+  --blue:#1967af;
+  --yellow:#ffcc00;
+  --bg-accent:#f7f8ad;
 }
 
-/* ===== Reset base ===== */
+/* Reset */
 *{ box-sizing:border-box; }
 body{
-  margin:0;
-  padding:0;
+  margin:0; padding:0;
   font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   background:url("/assets/grass.jpeg") no-repeat center center fixed;
   background-size:cover;
 }
 .container{ max-width:980px; margin:24px auto; padding:0; }
 
-/* ===== Header & footer ===== */
-.hd-header,.hd-footer{
-  background:url("/assets/HeaderBackground.png") no-repeat center center;
-  background-size:cover;
-  border-bottom:1px solid #feba0e;
-}
-.hd-header{
-  height:120px;
-  position:sticky; top:0; z-index:20;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 40px;
-}
-.hd-footer{
-  margin-top:24px; padding:12px 16px; border-top:1px solid #f7f8ad; border-bottom:0;
-}
+/* Header / footer */
+.hd-header,.hd-footer{ background:url("/assets/HeaderBackground.png") no-repeat center center; background-size:cover; border-bottom:1px solid #feba0e; }
+.hd-header{ height:120px; position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; padding:0 40px; }
+.hd-footer{ margin-top:24px; padding:12px 16px; border-top:1px solid #f7f8ad; border-bottom:0; }
 .brand { position: relative; z-index: 5; }
 .logo-img{ height:100px; margin-right:10px; vertical-align:middle; cursor:pointer; }
 .logo-img2{ height:170px; margin-right:10px; vertical-align:middle; cursor:pointer; }
 
-/* ===== Nav ===== */
-.nav    { position: relative; z-index: 1; } 
-.nav-link{
-  position: relative;          /* contexto para el texto absoluto */
-  display: inline-block;
-  width: 110px;                 /* ajusta si quieres más grande/pequeño */
-  height: 44px;
-  padding: 0;                   /* nada de padding para que coincida exacto */
-  border-radius: 8px;
-  text-decoration: none;
-  color: #222;
-  font-weight: 700;
-}
-.nav-active .nav-btn-img{ filter: brightness(1.05); }
-.nav-link:hover{ 
-  /* NO transform: scale(); ni cambios de color del texto aquí */
-  color: inherit;
-  transform: none;
-}
-.nav-btn-img{
-  position: absolute;
-  inset: 0;                     /* top:0 right:0 bottom:0 left:0 */
-  width: 100%;
-  height: 100%;
-  object-fit: contain;          /* no distorsiona */
-  display: block;
-}
-/* 
-.nav-btn-text {
-  position: absolute;
-  color: white;                   
-  font-size: 16px;                
-  font-weight: 900;               
-  text-align: center;
-  pointer-events: none;
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000; /
-  width: 100%;                    
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%); 
-} */
-.nav-btn-text{
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  color: #fff;                  /* siempre blanco */
-  font-size: 16px;
-  font-weight: 900;
-  pointer-events: none;         /* clics caen en el enlace */
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000;           /* borde negro grueso */
-}
+/* Nav (botones con imagen) */
+.nav { position: relative; z-index: 1; }
+.nav-link{ position:relative; display:inline-block; width:110px; height:44px; padding:0; border-radius:8px; text-decoration:none; color:#222; font-weight:700; }
+.nav-active .nav-btn-img{ filter:brightness(1.05); }
+.nav-link:hover{ color:inherit; transform:none; }
+.nav-btn-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; display:block; }
+.nav-btn-text{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; width:100%; color:#fff; font-size:16px; font-weight:900; pointer-events:none; text-shadow:-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
 
-/* ===== Cards ===== */
-.card{
-  background:var(--bg-accent);
-  padding:16px; border-radius:16px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06);
-}
+/* Cards */
+.card{ background:var(--bg-accent); padding:16px; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 
-/* ===== Tables ===== */
+/* Tablas */
 .hd-table{ width:100%; border-collapse:collapse; background:#feba0e; border-radius:12px; overflow:hidden; }
 .hd-table th, .hd-table td{ border-bottom:1px solid #b9880b; padding:10px 8px; }
 .hd-table thead th{ background:#d58d23; text-align:center; }
@@ -113,129 +42,73 @@ body{
 .center{ text-align:center; vertical-align:middle; }
 .align-right{ text-align:right; }
 
-/* ===== Progress bars ===== */
-.progress{
-  display:flex; width:100%; height:16px; border-radius:999px; overflow:hidden; background:transparent;
-}
+/* Barras progreso */
+.progress{ display:flex; width:100%; height:16px; border-radius:999px; overflow:hidden; background:transparent; }
 .progress .done{ background:var(--green); transition:width .25s ease; }
-.progress .todo{ background:var(--blue);  transition:width .25s ease; }
+.progress .todo{ background:var(--blue); transition:width .25s ease; }
 .progress-note{ margin-top:6px; font-size:.9rem; color:#334; }
 
-/* ===== Home: layout principal ===== */
-.home-layout{
-  display:grid;
-  grid-template-columns: 1fr 2fr;   /* 1/3 | 2/3 */
-  column-gap:24px;
-  align-items:start;               /* ambas columnas arrancan arriba */
-}
-.home-title{
-  grid-column:1 / -1;              /* ocupa ancho completo */
-  justify-self:center;
-  margin:0 0 12px;
-  text-align:center;
-}
+/* ===== Home layout: ahora 2fr | 1fr ===== */
+.home-layout{ display:grid; grid-template-columns: 2fr 1fr; column-gap:24px; align-items:start; }
+.home-title{ grid-column:1 / -1; justify-self:center; margin:0 0 12px; text-align:center; }
 
-/* Columna izquierda: 2x5 tiles fijos */
+/* Grid de páginas (ahora en derecha) */
 .home-left{ align-self:start; }
-.home-grid{
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); /* SIEMPRE 2 columnas */
-  grid-auto-rows: 1fr;                               /* filas uniformes */
-  gap:16px;
-}
-.home-card-wrap{
-  border:2px solid #000; border-radius:14px; padding:12px;
-  background:var(--bg-accent);
-  display:flex; flex-direction:column; gap:12px;
-}
-.home-card{
-  display:grid; place-items:center; height:64px; text-align:center;
-  background:var(--yellow); color:#222; font-weight:700; text-decoration:none;
-  border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,.08);
-  transition:transform .15s ease, box-shadow .15s ease;
-}
+.home-grid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap:16px; }
+.home-card-wrap{ border:2px solid #000; border-radius:14px; padding:12px; background:var(--bg-accent); display:flex; flex-direction:column; gap:12px; }
+.home-card{ display:grid; place-items:center; height:64px; text-align:center; background:var(--yellow); color:#222; font-weight:700; text-decoration:none; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,.08); transition:transform .15s ease, box-shadow .15s ease; }
 .home-card:hover{ transform:translateY(-1px); box-shadow:0 4px 8px rgba(0,0,0,.08); }
-.home-card-img{
-  width:100%; height:100px; display:block; object-fit:contain;
-  background:var(--bg-accent); border-radius:12px;
-}
+.home-card-img{ width:100%; height:100px; display:block; object-fit:contain; background:var(--bg-accent); border-radius:12px; }
 
-/* Columna derecha */
+/* Columna izquierda (stats + anillos + resumen) */
 .home-right{ display:grid; gap:16px; align-content:start; }
 
-/* XP / Reputation cards */
-.stats-row{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:16px;
-  align-items:start;
-}
-.stat-card{
-  position:relative;
-  display:grid;
-  place-items:center;
-}
+/* XP / Rep */
+.stats-row{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; }
+.stat-card{ position:relative; display:grid; place-items:center; }
 .stat-img{ width:140px; height:auto; display:block; }
-.stat-input{
-  position:absolute; inset:0; margin:auto; width:84px; height:56px;
-  background:transparent; border:none; outline:none;
-  color:#fff; font-weight:900; font-size:36px; text-align:center;
-  text-shadow:-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
-  font-variant-numeric: tabular-nums;
-}
-/* quitar “spinners” en algunos navegadores */
-.stat-input::-webkit-outer-spin-button,
-.stat-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.stat-input{ position:absolute; inset:0; margin:auto; width:84px; height:56px; background:transparent; border:none; outline:none; color:#fff; font-weight:900; font-size:36px; text-align:center; text-shadow:-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; font-variant-numeric:tabular-nums; }
+.stat-input::-webkit-outer-spin-button, .stat-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
 
-/* ===== Progress summary ===== */
+/* Anillos */
+.rings-row{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+.ring-card{ display:grid; place-items:center; gap:8px; }
+.ring-svg{ display:block; }
+.ring-text{ fill:#fff; font-weight:900; font-size:42px; text-shadow:-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
+.ring-label{ font-weight:700; text-align:center; }
+
+/* Summary */
 .summary-rows{ display:grid; gap:10px; }
-.summary-row{
-  display:grid; grid-template-columns:220px 1fr 70px; align-items:center; gap:10px;
-}
+.summary-row{ display:grid; grid-template-columns:220px 1fr 70px; align-items:center; gap:10px; }
+
+/* Responsive */
 @media (max-width: 900px){
   .home-layout{ grid-template-columns: 1fr; }
   .home-grid{ grid-template-columns: 1fr; }
+  .rings-row{ grid-template-columns: 1fr; }
   .summary-row{ grid-template-columns: 1fr; }
 }
 
-/* ===== Mini progress (Home y resumen) ===== */
-.mini-progress{
-  display:flex; width:100%; height:10px; border-radius:999px; overflow:hidden; background:transparent;
-}
+/* Mini progress */
+.mini-progress{ display:flex; width:100%; height:10px; border-radius:999px; overflow:hidden; background:transparent; }
 .mini-progress .mini-done{ background:var(--green); transition:width .25s ease; }
-.mini-progress .mini-todo{ background:var(--blue);  transition:width .25s ease; }
+.mini-progress .mini-todo{ background:var(--blue); transition:width .25s ease; }
 .home-mini-row{ display:grid; grid-template-columns:1fr 64px; align-items:center; gap:10px; }
 .mini-pct{ text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
 
-/* ===== Star / image toggle (StarToggle) ===== */
-.star-btn{
-  display:inline-grid; place-items:center;
-  width:100px; height:50px; padding:0; border:none; background:transparent;
-  cursor:pointer; line-height:0; border-radius:6px;
-}
-.star-btn img{
-  width:100%; height:100%; object-fit:contain;
-  user-select:none; -webkit-user-drag:none;
-  filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
-  transition:transform .12s ease;
-}
+/* StarToggle + botones pequeños */
+.star-btn{ display:inline-grid; place-items:center; width:100px; height:50px; padding:0; border:none; background:transparent; cursor:pointer; line-height:0; border-radius:6px; }
+.star-btn img{ width:100%; height:100%; object-fit:contain; user-select:none; -webkit-user-drag:none; filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); transition:transform .12s ease; }
 .star-btn:is(:hover,:focus-visible) img{ transform:scale(1.5); }
 .star-btn:focus-visible{ outline:2px solid var(--green); outline-offset:2px; }
 
-/* ===== Buttons pequeños (contadores) ===== */
-.btn-small{
-  background:var(--yellow); color:#222; border:1px solid #e1e6e1;
-  border-radius:8px; padding:4px 12px; font-weight:700; cursor:pointer;
-  transition:filter .15s ease, transform .05s ease;
-}
+.btn-small{ background:var(--yellow); color:#222; border:1px solid #e1e6e1; border-radius:8px; padding:4px 12px; font-weight:700; cursor:pointer; transition:filter .15s ease, transform .05s ease; }
 .btn-small:hover{ filter:brightness(.95); }
 .btn-small:active{ transform:translateY(1px); }
 
-/* Contadores genéricos */
 .counter{ display:inline-flex; align-items:center; gap:10px; }
 .counter span{ min-width:56px; text-align:center; }
 
-/* Service Buildings (Town) */
 .svc-counter{ display:inline-flex; align-items:center; justify-content:center; gap:10px; white-space:nowrap; }
 .svc-counter span{ min-width:56px; text-align:center; }
 .svc-counter .btn-small{ min-width:28px; height:28px; padding:0 8px; line-height:1; }
