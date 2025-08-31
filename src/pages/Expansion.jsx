@@ -2,133 +2,125 @@ import { useEffect, useMemo, useState } from "react";
 
 const STORAGE_KEY = "hayday-progress-v1";
 
-// Datos iniciales según tu planilla
-const farmMaster = [
-  { name: "Main Section",    total: 52 },
-  { name: "Special Sections", total: 114 },
-];
-
-const townMaster = [
-  { name: "Town", total: 18 },
-];
-
-const fishMaster = [
-  { name: "Fishing Spots", total: 15 },
-];
-
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
-
-function pctFromItems(items) {
+const pctFromCounters = (items) => {
   if (!Array.isArray(items) || !items.length) return 0;
   const total = items.reduce((a, r) => a + (+r.total || 0), 0);
   const curr  = items.reduce((a, r) => a + (+r.current || 0), 0);
   if (!total) return 0;
   return +((curr / total) * 100).toFixed(2);
-}
+};
 
-function normalize(saved, master) {
-  // Ajusta lo guardado a la lista maestra (nombres y máximos)
-  if (!Array.isArray(saved) || !saved.length) {
-    return master.map(m => ({ name: m.name, current: 0, total: m.total }));
-  }
-  const byName = new Map(saved.map(x => [String(x?.name ?? ""), x]));
-  return master.map(m => {
-    const r = byName.get(m.name);
-    const total = +m.total || 0;
-    const current = clamp(+r?.current || 0, 0, total);
-    return { name: m.name, current, total };
-  });
-}
+/** Counter genérico */
+const Counter = ({ value, max, onDecr, onIncr }) => {
+  const isMin = value <= 0;
+  const isMax = value >= max;
+  const styleMin = isMin ? { opacity: .5, filter:"grayscale(1)", cursor:"not-allowed" } : undefined;
+  const styleMax = isMax ? { opacity: .5, filter:"grayscale(1)", cursor:"not-allowed" } : undefined;
+
+  return (
+    <div className="counter">
+      <button className="btn-small" disabled={isMin} style={styleMin} onClick={onDecr}>-</button>
+      <span>{value}</span>
+      <button className="btn-small" disabled={isMax} style={styleMax} onClick={onIncr}>+</button>
+    </div>
+  );
+};
 
 export default function Expansion() {
-  // Carga inicial
+  // Estado inicial
   const load = useMemo(() => () => {
     let all = {};
     try { all = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     catch { all = {}; }
 
-    const farm = normalize(all?.expansion?.farm, farmMaster);
-    const town = normalize(all?.expansion?.town, townMaster);
-    const fish = normalize(all?.expansion?.fish, fishMaster);
+    // Si ya tenías algo guardado, tratamos de respetarlo
+    const saved = all?.expansion?.items;
+    let farm = [
+      { name: "Main Section",     current: 52, total: 52 },
+      { name: "Special Sections", current: 73, total: 114 },
+    ];
+    let town = [
+      { name: "Town", current: 18, total: 18 },
+    ];
+    let fishing = [
+      { name: "Fishing Spots", current: 15, total: 15 },
+    ];
 
-    return { farm, town, fish };
+    if (Array.isArray(saved) && saved.length) {
+      // mapa por nombre
+      const byName = new Map(saved.map(x => [String(x?.name ?? ""), x]));
+      farm = farm.map(x => ({ ...x, current: clamp(+byName.get(x.name)?.current || x.current, 0, x.total) }));
+      town = town.map(x => ({ ...x, current: clamp(+byName.get(x.name)?.current || x.current, 0, x.total) }));
+      fishing = fishing.map(x => ({ ...x, current: clamp(+byName.get(x.name)?.current || x.current, 0, x.total) }));
+    }
+
+    return { farm, town, fishing };
   }, []);
 
-  const [{ farm, town, fish }, setState] = useState(load);
+  const [state, setState] = useState(load);
 
-  // Guardado
+  // Progresos y persistencia
+  const farmPct     = pctFromCounters(state.farm);
+  const townPct     = pctFromCounters(state.town);
+  const fishingPct  = pctFromCounters(state.fishing);
+  const combinedPct = (() => {
+    const items = [...state.farm, ...state.town, ...state.fishing];
+    return pctFromCounters(items);
+  })();
+
   useEffect(() => {
-    const all = (() => {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-      catch { return {}; }
-    })();
-
-    // also store a flat `items` so Home can read with calcCounterPct
-    const items = [...farm, ...town, ...fish];
-
-    all.expansion = {
-      farm, town, fish, items,
-      updatedAt: new Date().toISOString(),
-    };
+    const items = [...state.farm, ...state.town, ...state.fishing];
+    const all = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }})();
+    all.expansion = { items, updatedAt: new Date().toISOString() };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-  }, [farm, town, fish]);
+  }, [state]);
 
-  // Acciones
-  const incr = (which, i) => {
-    setState(prev => {
-      const next = { ...prev, [which]: prev[which].map((r, idx) =>
-        idx === i ? { ...r, current: clamp(r.current + 1, 0, r.total) } : r
-      )};
-      return next;
-    });
-  };
-  const decr = (which, i) => {
-    setState(prev => {
-      const next = { ...prev, [which]: prev[which].map((r, idx) =>
-        idx === i ? { ...r, current: clamp(r.current - 1, 0, r.total) } : r
-      )};
-      return next;
-    });
-  };
+  // Helpers de +/- por sección
+  const decr = (section, i) => setState(prev => {
+    const list = prev[section].map((r, idx) =>
+      idx === i ? { ...r, current: clamp(r.current - 1, 0, r.total) } : r
+    );
+    return { ...prev, [section]: list };
+  });
+  const incr = (section, i) => setState(prev => {
+    const list = prev[section].map((r, idx) =>
+      idx === i ? { ...r, current: clamp(r.current + 1, 0, r.total) } : r
+    );
+    return { ...prev, [section]: list };
+  });
 
-  // Progresos
-  const farmPct = pctFromItems(farm);
-  const townPct = pctFromItems(town);
-  const fishPct = pctFromItems(fish);
-  const totalPct = pctFromItems([...farm, ...town, ...fish]);
-
-  const SectionTable = ({ title, which, rows, pct }) => (
-    <section className="card" style={{ marginTop: 16 }}>
+  const Section = ({ title, rows, sectionKey, pct }) => (
+    <section className="card" style={{ marginTop: 20 }}>
       <h2 style={{ marginTop: 0 }}>{title}</h2>
-
       <div className="progress" style={{ marginBottom: 12 }}>
         <div className="done" style={{ width: `${pct}%` }} />
-        <div className="todo" style={{ width: `${(100 - pct)}%` }} />
+        <div className="todo" style={{ width: `${100 - pct}%` }} />
       </div>
       <div className="progress-note">{pct.toFixed(2)}% completed</div>
 
-      <div className="table-wrap" style={{ marginTop: 12 }}>
+      <div className="table-wrap" style={{ marginTop: 16 }}>
         <table className="hd-table" aria-label={title}>
           <thead>
             <tr>
-              <th style={{ width: "60%" }}>{title === "Farm" ? "Farm" : title}</th>
-              <th className="center">Current</th>
+              <th>Name</th>
+              <th className="center">Owned</th>
               <th className="center">Total</th>
-              <th className="center">Adjust</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={r.name + i}>
                 <td className="name-cell">{r.name}</td>
-                <td className="center">{r.current}</td>
-                <td className="center">{r.total}</td>
                 <td className="center">
-                  <div className="counter">
-                    <button className="btn-small" onClick={() => decr(which, i)}>-</button>
-                    <button className="btn-small" onClick={() => incr(which, i)}>+</button>
-                  </div>
+                  <Counter
+                    value={r.current}
+                    max={r.total}
+                    onDecr={() => decr(sectionKey, i)}
+                    onIncr={() => incr(sectionKey, i)}
+                  />
                 </td>
+                <td className="center">{r.total}</td>
               </tr>
             ))}
           </tbody>
@@ -139,20 +131,19 @@ export default function Expansion() {
 
   return (
     <main className="container">
-      {/* Progreso total arriba */}
+      {/* Progreso total */}
       <section className="card">
-        <h2 style={{ marginTop: 0 }}>Expansion — Overall progress</h2>
+        <h2 style={{ marginTop: 0 }}>Expansion — Overall Progress</h2>
         <div className="progress" style={{ marginBottom: 12 }}>
-          <div className="done" style={{ width: `${totalPct}%` }} />
-          <div className="todo" style={{ width: `${(100 - totalPct)}%` }} />
+          <div className="done" style={{ width: `${combinedPct}%` }} />
+          <div className="todo" style={{ width: `${100 - combinedPct}%` }} />
         </div>
-        <div className="progress-note">{totalPct.toFixed(2)}% completed</div>
+        <div className="progress-note">{combinedPct.toFixed(2)}% completed</div>
       </section>
 
-      {/* Tres contenedores */}
-      <SectionTable title="Farm" which="farm" rows={farm} pct={farmPct} />
-      <SectionTable title="Town" which="town" rows={town} pct={townPct} />
-      <SectionTable title="Fishable Areas" which="fish" rows={fish} pct={fishPct} />
+      <Section title="Farm"            rows={state.farm}     sectionKey="farm"     pct={farmPct} />
+      <Section title="Town"            rows={state.town}     sectionKey="town"     pct={townPct} />
+      <Section title="Fishable Areas"  rows={state.fishing}  sectionKey="fishing"  pct={fishingPct} />
     </main>
   );
 }
