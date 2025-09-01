@@ -178,3 +178,20 @@ body{
 .svc-counter{ display:inline-flex; align-items:center; justify-content:center; gap:10px; white-space:nowrap; }
 .svc-counter span{ min-width:56px; text-align:center; }
 .svc-counter .btn-small{ min-width:28px; height:28px; padding:0 8px; line-height:1; }
+
+.farm-input {
+  font: inherit;             /* hereda tipografía y tamaño */
+  font-weight: inherit;
+  font-size: 1em;
+  color: inherit;            /* mismo color que el h2 */
+  text-align: left;
+  background: transparent;
+  border: none;
+  outline: none;
+  max-width: 300px;          /* evita que se desborde */
+}
+.farm-input::placeholder {
+  color: #555;               /* placeholder gris */
+  opacity: 0.7;
+  text-align: left;
+}

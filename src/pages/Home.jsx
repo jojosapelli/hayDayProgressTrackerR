@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 
@@ -109,7 +110,6 @@ function Ring({ value, size = 240, stroke = 22, colorDone = "var(--green)", colo
       >
         {value.toFixed(2)}%
       </text>
-
     </svg>
   );
 }
@@ -117,6 +117,21 @@ function Ring({ value, size = 240, stroke = 22, colorDone = "var(--green)", colo
 /* ===== Componente ===== */
 export default function Home() {
   const base = import.meta.env.BASE_URL;
+
+  // Nombre de la granja (máx. 20 chars) — PERSISTE
+  const [farmName, setFarmName] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY))?.farmName ?? ""; }
+    catch { return ""; }
+  });
+  useEffect(() => {
+    const all = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }})();
+    all.farmName = farmName;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  }, [farmName]);
+  const onFarmNameChange = (e) => {
+    const val = e.target.value.slice(0, 20);
+    setFarmName(val);
+  };
 
   // XP & Rep con persistencia
   const [xp, setXp] = useState(() => {
@@ -206,7 +221,17 @@ export default function Home() {
   return (
     <main className="container">
       <div className="home-layout">
-        <h2 className="home-title">Welcome Farmer!</h2>
+        <h2 className="home-title">
+          Welcome{" "}
+          <input
+            type="text"
+            value={farmName}
+            onChange={onFarmNameChange}
+            placeholder=" enter farm name"
+            className="farm-input"
+            aria-label="Farm name"
+          />
+        </h2>
 
         {/* IZQUIERDA (2/3): XP/Rep + anillos + resumen */}
         <div className="home-left">
@@ -241,7 +266,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Anillos: Overall y Town (con colores pedidos) */}
+          {/* Anillos: Overall y Town */}
           <div className="stats-row">
             <div className="card" style={{ display: "grid", placeItems: "center" }}>
               <Ring value={overallAvg} />
@@ -306,7 +331,6 @@ export default function Home() {
                     onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
                   />
 
-                  {/* Fuerzo colores aquí para que SIEMPRE se vea el celeste de avance */}
                   <div className="home-mini-row">
                     <div className="mini-progress">
                       <div
