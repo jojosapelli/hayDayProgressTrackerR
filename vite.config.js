@@ -6,6 +6,6 @@ const repoName = process.env.GITHUB_REPOSITORY
   : ''
 
 export default defineConfig({
-  base: repoName ? `/${repoName}/` : '/',
+  base: '/hayDayProgressTrackerR/',
   plugins: [react()],
 })
